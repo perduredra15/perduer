@@ -1,1 +1,57 @@
-blank
+defaults: &defaults
+  docker:
+    - image: circleci/ruby:2.4.2-node-browsers
+  working_directory: ~/repo
+
+  steps:
+    - checkout
+
+    # Download and cache dependencies
+    - restore_cache:
+        keys:
+        - v1-dependencies-{{ checksum "Gemfile.lock" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+    - run:
+        name: install dependencies
+        command: |
+          bundle install --jobs=4 --retry=3 --path vendor/bundle
+
+    - save_cache:
+        paths:
+          - ./vendor/bundle
+        key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+
+    # run tests!
+    - run:
+        name: run tests
+        command: |
+          bundle exec ruby run_test.rb
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+  gengar:
+    <<: *defaults
+  vaporeon:
+    <<: *defaults
+
+workflows:
+  version: 2
+  test_everything_each_half_our:
+    jobs:
+      - gengar
+      - vaporeon
+    triggers:
+      - schedule:
+          cron: "7 1 * * *"
+          filters:
+            branches:
+              only:
+                - master
+  commit:
+    jobs:
+      - vaporeon
+      - gengar
