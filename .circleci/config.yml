@@ -46,7 +46,7 @@ workflows:
       - vaporeon
     triggers:
       - schedule:
-          cron: "7 1 * * *"
+          cron: "30 15 * * *"
           filters:
             branches:
               only:
