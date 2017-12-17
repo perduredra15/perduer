@@ -30,3 +30,6 @@ script: bundle exec ruby run_test.rb
 branches:
   only:
     - master
+    - prod
+    - qa
+    - staging
